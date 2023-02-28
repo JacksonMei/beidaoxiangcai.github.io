@@ -1,0 +1,545 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=&#34;auto&#34;>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  
+    <meta name="description" content="编程的世界">
+  
+  <meta name="author" content="Jackson Mei">
+  <meta name="keywords" content="serverless">
+  <meta name="google-site-verification" content="KDDgythksGF7r6jfDKcmG15FP779PpJdZygfbTz73iY" />
+  
+  <title>C++ std::priority_queue优先队列详解 - 老梅的博客</title>
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@4.0.0/github-markdown.min.css" />
+  <link  rel="stylesheet" href="/lib/hint/hint.min.css" />
+
+  
+    
+    
+      
+      <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@10.4.0/styles/github-gist.min.css" />
+    
+  
+
+  
+    <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+  
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_ba1fz6golrf.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_kmeydafke9r.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    var CONFIG = {"hostname":"jacksonmei.github.io","root":"/","version":"1.8.8","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"right","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"copy_btn":true,"image_zoom":{"enable":true},"toc":{"enable":true,"headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"onlypost":false},"web_analytics":{"enable":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null}}};
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>老梅的博客</strong>&nbsp;</a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                首页
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                归档
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                分类
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                标签
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                关于
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;</a>
+          </li>
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" href="javascript:">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+    <div class="banner" id="banner" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="page-header text-center fade-in-up">
+            <span class="h2" id="subtitle" title="C++ std::priority_queue优先队列详解">
+              
+            </span>
+
+            
+              <div class="mt-3">
+  
+  
+    <span class="post-meta">
+      <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+      <time datetime="2021-03-14 20:57" pubdate>
+        2021年3月14日 晚上
+      </time>
+    </span>
+  
+</div>
+
+<div class="mt-1">
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-chart"></i>
+      1.2k 字
+    </span>
+  
+
+  
+    
+    <span class="post-meta mr-2">
+      <i class="iconfont icon-clock-fill"></i>
+      
+      
+      17
+       分钟
+    </span>
+  
+
+  
+  
+</div>
+
+            
+          </div>
+
+          
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">C++ std::priority_queue优先队列详解</h1>
+            
+            <div class="markdown-body">
+              <h2 id="STL-priority-queue优先队列"><a href="#STL-priority-queue优先队列" class="headerlink" title="STL priority_queue优先队列"></a>STL priority_queue优先队列</h2><p>优先队列是一种容器适配器，队列元素要求实现了严格弱排序（Strict Weak Ordering），保证队列顶点（top）元素始终为最大值（最小值）。</p>
+<p>优先队列本质上是一种堆，默认最大堆，即每一个父节点的值都比其子节点要大，因此根节点中的元素总是树中的最大值，因此常用于最值的读取。在时间复杂度上，优先队列实现单个元素的增删都是O(log n)，而读取队列顶点则为O(1)</p>
+<h2 id="接口原型-🔎"><a href="#接口原型-🔎" class="headerlink" title="接口原型 🔎"></a>接口原型 🔎</h2><p>如下接口定义可以看出，优先队列的定义包含三个元素：</p>
+<ul>
+<li>元素类型T；</li>
+<li>存储元素的基础容器类型，要求为拥有连续内存分布的<a target="_blank" rel="noopener" href="https://en.cppreference.com/w/cpp/named_req/SequenceContainer">SequenceContainer</a>， STL中满足的就是std::vector and std::deque两种了；</li>
+<li>元素比较函数Compare， Compare函数主要用于元素比较，实现严格的弱排序，由于排序，优先队列已经不满足“先进先出”的特性了。</li>
+</ul>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-keyword">template</span> &lt;<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">T</span>, <span class="hljs-keyword">class</span> <span class="hljs-title">Container</span> =</span> <span class="hljs-built_in">vector</span>&lt;T&gt;,<br>  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compare</span> =</span> less&lt;<span class="hljs-keyword">typename</span> Container::value_type&gt; &gt; <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">priority_queue</span>;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="主要成员函数"><a href="#主要成员函数" class="headerlink" title="主要成员函数"></a>主要成员函数</h2><p>所有STL标准库实现的数据结构，都有对应的CRUD（增删改查）接口，形式也基本类似.</p>
+<p><img src="/img/priority_queues_feat.png" srcset="/img/loading.gif" alt="优先队列出入示意图"></p>
+<p><img src="/img/priority_queue_member_function.png" srcset="/img/loading.gif" alt="成员函数详解表"></p>
+<h2 id="Comp函数"><a href="#Comp函数" class="headerlink" title="Comp函数"></a><strong>Comp函数</strong></h2><p>comp函数默认为使用仿函数<code>std::less&lt;int&gt;</code>,表示最大堆 ，这里less是降序，但由于优先队列将top指向了队列尾；同理，<code>std::greater&lt;T&gt;</code>,表示最小堆.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Compare</span> =</span> less&lt;<span class="hljs-keyword">typename</span> Container::value_type&gt; <br></code></pre></td></tr></table></figure>
+
+<p>comp函数要求严格弱排序，那么什么是严格弱排序</p>
+<p>维基百科给出了如下定义，简言之就是内置类型会通过<code>!(a &lt; b) &amp;&amp; !( b &lt; a ) </code>来判断ab是否相等，如果判断中携带了<code>=</code>如<code>&gt;=</code>、<code>&lt;=</code>，将导致相等判断逻辑出现错误。</p>
+<blockquote>
+<p>A Strict Weak Ordering is a Binary Predicate that compares two objects, returning true if the first precedes the second. This predicate must satisfy the standard mathematical definition of a strict weak ordering. The precise requirements are stated below, but what they roughly mean is that a Strict Weak Ordering has to behave the way that “less than” behaves: if a is less than b then b is not less than a, if a is less than b and b is less than c then a is less than c, and so on.</p>
+</blockquote>
+<p>另外当元素类型T为自定义类型时，那就需要自定义的comp函数，一般有实现后缀运算<code>()</code>函数 和 重载关系运算符 <code>&lt;</code>、 <code>&gt;</code> 两种方式</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;queue&gt; // priority_queue头文件</span></span><br><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span><span class="hljs-meta-string">&lt;functional&gt; // 仿函数头文件</span></span><br><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Node</span> &#123;</span><br>		<span class="hljs-keyword">int</span> x, y; <br>		node(<span class="hljs-keyword">int</span> x, <span class="hljs-keyword">int</span> y) : x(x), y(y) &#123;&#125; <br>&#125;;<br> <br><span class="hljs-comment">// &lt;操作符用于仿函数std::less</span><br><span class="hljs-comment">// node比较先按照x降序，x相等时，再按照y降序</span><br><span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span> &lt; (Node a, Node b) <br>&#123; <br>      <span class="hljs-keyword">if</span> (a.x &gt; b.x) &#123;<br>					<span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>			&#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (a.x == b.x) &#123;<br>					<span class="hljs-keyword">return</span> a.y &gt; b.y; <span class="hljs-comment">// 严格弱排序</span><br>			&#125; <span class="hljs-keyword">else</span> &#123;<br>					<span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>			&#125;      <br>&#125;<br><br><span class="hljs-built_in">std</span>::<span class="hljs-built_in">priority_queue</span>&lt;Node, <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;Node&gt;, <span class="hljs-built_in">std</span>::less&lt;Node&gt;&gt; pq; <span class="hljs-comment">// 大顶堆</span><br><br><span class="hljs-comment">// &gt;操作符用于仿函数std::greater</span><br><span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span> &gt; (Node a, Node b)<br>&#123;<br>    <span class="hljs-keyword">return</span> a.x&gt; b.x;<br>&#125;<br><br><span class="hljs-built_in">std</span>::<span class="hljs-built_in">priority_queue</span>&lt;Node, <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;Node&gt;, <span class="hljs-built_in">std</span>::greater&lt;Node&gt;&gt; pq; <span class="hljs-comment">// 小顶堆</span><br><br><span class="hljs-comment">// 自定义后缀操作符</span><br><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">cmp</span></span><br><span class="hljs-class">&#123;</span><br>    <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">operator</span><span class="hljs-params">()</span><span class="hljs-params">(Node a,Node b)</span></span><br><span class="hljs-function">    </span>&#123;<br>		  <span class="hljs-keyword">return</span> a.x &gt; b.x;<br>    &#125;<br>&#125;;<br><br><span class="hljs-built_in">std</span>::<span class="hljs-built_in">priority_queue</span>&lt;Node, <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;Node&gt;, cmp&gt; pq;<br><br></code></pre></td></tr></table></figure>
+
+<h2 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h2><p>优先队列作为数据结构中堆的一种具体实现，在leetcode算法题中出现频率较高。比如这题<a target="_blank" rel="noopener" href="https://leetcode.com/problems/maximum-average-pass-ratio/">leetcode 1792. Maximum Average Pass Ratio</a></p>
+<p>在如下解答中，可以发现priority_queue的几个关键接口的使用。</p>
+<p>另外算法层面可以看到，通过对优先队列进行增删读元素，使得每次都对最值进行操作，也就保证了每次操作都为最优解。实际上这就是<strong>贪心算法，通过求解每个子问题的最优解，来得到整个问题的最终最优解</strong>。也正因如此，优先队列就常在一些有约束条件下的分配问题。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Solution</span> &#123;</span><br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-comment">// !!整数除法一定先转double, 注意检查括号</span><br>    <span class="hljs-comment">// !!乘法注意溢出，少量的除法误差可以容忍</span><br>    <span class="hljs-meta">#<span class="hljs-meta-keyword">define</span> cal(xy) ((double)(xy[0] +1) / (xy[1] + 1) - (double)(xy[0]) / (xy[1]))</span><br><br>    <span class="hljs-function"><span class="hljs-keyword">double</span> <span class="hljs-title">maxAverageRatio</span><span class="hljs-params">(<span class="hljs-built_in">vector</span>&lt;<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">int</span>&gt;&gt;&amp; classes, <span class="hljs-keyword">int</span> extraStudents)</span> </span>&#123;<br>        <span class="hljs-built_in">priority_queue</span>&lt;<span class="hljs-built_in">pair</span>&lt;<span class="hljs-keyword">double</span>, <span class="hljs-keyword">int</span>&gt;&gt; qu; <span class="hljs-comment">// 默认最大堆</span><br>        <br>        <span class="hljs-comment">// 入队列，按照分配1个之后的差值，排序</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">int</span> i = <span class="hljs-number">0</span>; i &lt; classes.size(); i++) &#123;            <br>            qu.emplace(cal(classes[i]), i); <span class="hljs-comment">// !!优先使用emplace/emplace_back， 比push/push_back更高效</span><br>        &#125;<br>        <br>        <span class="hljs-keyword">while</span> (extraStudents--) &#123;<br>            <span class="hljs-keyword">auto</span> [diff, i] = qu.top();<br>            qu.pop();<br>            <br>            <br>            <span class="hljs-comment">// 从队列中取出差值最大的一项，即分配给它后结果最大的</span><br>            classes[i][<span class="hljs-number">0</span>]++;<br>            classes[i][<span class="hljs-number">1</span>]++;<br>            <br>            <span class="hljs-comment">// 分配后重新塞回队列</span><br>            qu.push(&#123;cal(classes[i]), i&#125;);<br>        &#125;<br>        <br>        <span class="hljs-keyword">auto</span> maxsum = <span class="hljs-number">0.0</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span> c : classes) &#123;           <br>            <span class="hljs-comment">//cout &lt;&lt; cal(c) &lt;&lt; &quot;-&quot; &lt;&lt; c[0] &lt;&lt; &quot;-&quot; &lt;&lt; c[1] &lt;&lt; endl;</span><br>            maxsum += (<span class="hljs-keyword">double</span>)c[<span class="hljs-number">0</span>] / c[<span class="hljs-number">1</span>];<br>        &#125;<br>        <br>        <span class="hljs-keyword">return</span> maxsum / classes.size();<br>    &#125;    <br>&#125;;<br></code></pre></td></tr></table></figure>
+
+<p>⚠ <strong>Note</strong>: 转载请注明出处</p>
+
+            </div>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/C/">C++</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">
+                  
+                    本博客所有文章除特别声明外，均采用 <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/deed.zh" rel="nofollow noopener noopener">CC BY-SA 4.0 协议</a> ，转载请注明出处！
+                  
+                </p>
+              
+              
+                <div class="post-prevnext">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/03/14/%E9%AB%98%E9%A2%91VIM%E5%91%BD%E4%BB%A4/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">高频VIM命令</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2019/02/28/Go%E8%AF%AD%E8%A8%80%E4%B8%ADchannel%E7%9A%84%E5%B8%B8%E8%A7%81%E7%94%A8%E6%B3%95/">
+                        <span class="hidden-mobile">Go语言中channel的常见用法</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+              <!-- Comments -->
+              <article class="comments" id="comments">
+                
+                  
+                
+                
+  <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_config = function() {
+        this.page.url = 'http://jacksonmei.github.io/2021/03/14/C-std-priority-queue%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97%E8%AF%A6%E8%A7%A3/';
+        this.page.identifier = '/2021/03/14/C-std-priority-queue%E4%BC%98%E5%85%88%E9%98%9F%E5%88%97%E8%AF%A6%E8%A7%A3/';
+      };
+      Fluid.utils.waitElementVisible('disqus_thread', function () {
+        var d = document, s = d.createElement('script');
+        s.src = '//' + 'fluid' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', new Date());
+        (d.head || d.body).appendChild(s);
+      });
+    </script>
+    <noscript>Please enable JavaScript to view the
+      <a target="_blank" href="https://disqus.com/?ref_noscript" rel="nofollow noopener noopener">comments powered by Disqus.</a>
+    </noscript>
+  </div>
+
+
+              </article>
+            
+          </article>
+        </div>
+      </div>
+    </div>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+      </div>
+    
+  </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+
+    
+      <a id="scroll-top-button" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+
+    
+  </main>
+
+  <footer class="text-center mt-5 py-3">
+  <div class="footer-content">
+     <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+  </div>
+  
+  <div class="statistics">
+    
+    
+
+    
+      
+        <!-- 不蒜子统计PV -->
+        <span id="busuanzi_container_site_pv" style="display: none">
+            总访问量 
+            <span id="busuanzi_value_site_pv"></span>
+             次
+          </span>
+      
+      
+        <!-- 不蒜子统计UV -->
+        <span id="busuanzi_container_site_uv" style="display: none">
+            总访客数 
+            <span id="busuanzi_value_site_uv"></span>
+             人
+          </span>
+      
+    
+  </div>
+
+
+  
+
+  
+</footer>
+
+<!-- SCRIPTS -->
+
+  <script  src="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" ></script>
+<script  src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" ></script>
+<script  src="/js/debouncer.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+<!-- Plugins -->
+
+
+  
+    <script  src="/js/lazyload.js" ></script>
+  
+
+
+
+  
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/tocbot@4.12.0/dist/tocbot.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" ></script>
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/anchor-js@4.3.0/anchor.min.js" ></script>
+
+
+
+  <script defer src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js" ></script>
+
+
+
+  <script defer src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" ></script>
+
+
+
+
+  <script  src="https://cdn.jsdelivr.net/npm/typed.js@2.0.11/lib/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var title = document.getElementById('subtitle').title;
+      
+      typing(title)
+      
+    })(window, document);
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    (function () {
+      var path = "/local-search.xml";
+      $('#local-search-input').on('click', function() {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      });
+      $('#modalSearch').on('shown.bs.modal', function() {
+        $('#local-search-input').focus();
+      });
+    })()
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+
+
+
+
+<!-- 主题的启动项 保持在最底部 -->
+<script  src="/js/boot.js" ></script>
+
+
+
+</body>
+</html>
